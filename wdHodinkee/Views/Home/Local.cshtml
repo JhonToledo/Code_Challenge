@@ -1,0 +1,190 @@
+﻿
+@{
+    ViewData["Title"] = "Local";
+}
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+
+<style>
+    .img-responsive, .thumbnail > img, .thumbnail a > img, .carousel-inner > .item > img, .carousel-inner > .item > a > img {
+        height: 350px;
+        width: 700px;
+    }
+</style>
+
+<div class="container">
+    <br />
+    <div class="row">
+        <button type="button" id="btnNew" class="btn btn-default pull-left">Create News</button>
+    </div>
+</div>
+
+<div id="articles" class="container">
+</div>
+
+
+<script>
+
+
+    var listNews = [];
+    $(document).ready(function () {
+        loadNews();
+
+        $("#btnNew").click(function () {
+            $.ajax({
+                url: '@Url.Action("_New", "Home")',
+                type: 'GET',
+                success: function (response) {
+                    let $mymodal = $("#modal-container");
+                    $("#modal-content").html(response);
+                    $mymodal.modal("show");
+                }, error: function (xhr, textStatus, error) {
+                    alert(error, "Error", "error");
+                }
+            })
+        });
+
+        $('body').on('click', '.modal-close-btn', function () {
+            $('#modal-container').delay(0).fadeOut(500);
+
+            setTimeout(function () {
+                $("#modal-dialog").removeClass("modal-lg");
+                $('#modal-container').modal("hide");
+            }, 500);
+        });
+        $('#modal-container').on('hidden.bs.modal', function () {
+            $(this).removeData('bs.modal');
+        });
+        
+    });
+    
+    function loadNews() {
+        let data = getList();
+        if (data.length > 0) {
+            let articles = $("#articles");
+            articles.html("");
+            let count = 0;
+            $.each(data, function (i, item) {
+                let rw = '<input type="text" id="data'+count+'" style="display:none" value=\''+JSON.stringify(item)+'\'>';
+                rw += '<a style="color: black" onclick="loadContent(\''+count+'\')"><article class="row" style="padding: 20px 0px 25px 0px">';
+                rw += '<div class="col-md-7 col-md-push-5">';
+                rw += '<img src="' + item.image + '" alt="4x3 Image" class="img-responsive">';
+                rw += '</div>';
+                rw += '<div class="col-md-5 col-md-pull-7">';
+                rw += '<span style="font-size:26pt; font-family: Marker Felt;font-weight:700;">' + item.title + "&nbsp;" +
+                    '<a id="' + item.url + '" onclick="Edit(\'' + item.url + '\')" class="btn btn-xs">' +
+                    '<span class="glyphicon glyphicon-pencil text-warning" style="font-size:15px;">' +
+                    '</span>' +
+                    '</a>'+
+                    '<a id="' + item.url + '" onclick="Delete(\'' + item.url + '\')" class="btn btn-xs">' +
+                    '<span class="glyphicon glyphicon-trash text-danger" style="font-size:15px;">' +
+                    '</span>' +
+                    '</a></span>';
+                rw += '<p>' + item.description + '</p>';
+                rw += '<div style="font-family: Gill Sans, Gill Sans MT, Calibri, Trebuchet MS, sans-serif; font-size:9pt"><span class="by">By</span> ' + item.source.name.toUpperCase() + ' · ' + moment(item.source.publishedAt).format('LL').toString().toUpperCase(); + '</div>'
+                rw += '</div>';
+                rw += '</article></a>';
+                articles.append(rw);
+                count += 1;
+            });
+        }
+
+    }
+
+    function loadContent(url) {
+        let data = $("#data" + url + "").val();
+
+        $.ajax({
+            url: '@Url.Action("SetViewData", "Home")',
+            type: 'POST',
+            data: { value: data },
+            success: function (response) {
+                window.location.href = '@Url.Action("Article", "Home")';
+            }, error: function (xhr, textStatus, error) {
+                alert(error, "Error", "error");
+            }
+        }) 
+
+
+        
+    }
+
+    function getList() {
+        let storelist = localStorage.getItem('locallistnews');
+        if (storelist == null) {
+            listNews = [];
+        }
+        else {
+
+            listNews = JSON.parse(storelist);
+        }
+        return listNews;
+    }
+
+    function addNews(ptitle, pdescription, pcontent, purl, pimage, ppublishedAt, psource){
+        var news = {
+            title: ptitle,
+            description: pdescription,
+            content: pcontent,
+            url: purl,
+            image: pimage,
+            publishedAt: ppublishedAt,
+            source: psource
+        }
+        console.log(news);
+        listNews.push(news);
+        localstoragenews(listNews);
+        window.location.href = '@Url.Action("Local", "Home")';
+    }
+
+    function editNews(ptitle, pdescription, pcontent, pimage, ppublishedAt, psource) {
+        let url = localStorage.getItem("edit");
+        let data = getList();
+        $.each(data, function (a, elem) {
+            if (elem.url == url) {
+                elem.title = ptitle;
+                elem.description = pdescription;
+                elem.content = pcontent;
+                elem.image = pimage;
+                elem.publishedAt = ppublishedAt;
+                elem.source = psource;
+            }
+        });
+
+        console.log(data);
+        localstoragenews(data);
+        window.location.href = '@Url.Action("Local", "Home")';
+    }
+
+    function localstoragenews(list) {
+        localStorage.setItem("locallistnews", JSON.stringify(list));
+    }
+
+    function Edit(url) {
+        localStorage.setItem("edit", url);
+        $.ajax({
+            url: '@Url.Action("_Edit", "Home")',
+            type: 'GET',
+            success: function (response) {
+                let $mymodal = $("#modal-container");
+                $("#modal-content").html(response);
+                $mymodal.modal("show");
+            }, error: function (xhr, textStatus, error) {
+                alert(error, "Error", "error");
+            }
+        });
+    }
+
+    function Delete(url) {
+        if (confirm("Do you really want to delete selected job/s?")) {
+            let data = getList().filter(elem => elem.url != url);
+            localstoragenews(data);
+            window.location.href = '@Url.Action("Local", "Home")';
+        }
+        else {
+            return false;
+        }
+    }
+
+</script>

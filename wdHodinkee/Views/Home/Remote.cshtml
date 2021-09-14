@@ -1,0 +1,62 @@
+﻿
+
+@{
+    ViewData["Title"] = "Remote";
+}
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<style>
+    .img-responsive, .thumbnail > img, .thumbnail a > img, .carousel-inner > .item > img, .carousel-inner > .item > a > img {
+        height: 350px;
+        width: 700px;
+    }
+</style>
+
+<div id="articles" class="container">
+</div>
+
+<script>
+    $(document).ready(function () {
+        var url = "https://gnews.io/api/v4/search?q=watches&token=d1b06d89c72db28ecea0a05d55fe5125";
+        fetch(url)
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                let articles = $("#articles");
+                articles.html("");
+                let count = 0;
+                $.each(data.articles, function (i, item) {
+                    let rw = '<br />'
+                    rw += '<input type="text" id="data' + count + '" style="display:none" value=\'' + JSON.stringify(item) + '\'>';
+                    rw += '<a style="color: black" onclick="loadContent(\'' + count +'\')"><article class="row" style="padding: 20px 0px 25px 0px">';
+                    rw += '<div class="col-md-7 col-md-push-5">';
+                    rw += '<img src="' + item.image + '" alt="4x3 Image" class="img-responsive">';
+                    rw += '</div>';
+                    rw += '<div class="col-md-5 col-md-pull-7">';
+                    rw += '<span style="font-size:26pt; font-family: Marker Felt;font-weight:700;">' + item.title + '</span>';
+                    rw += '<p>' + item.description + '</p>';
+                    rw += '<div style="font-family: Gill Sans, Gill Sans MT, Calibri, Trebuchet MS, sans-serif; font-size:9pt"><span class="by">By</span> ' + item.source.name + ' · ' + moment(item.FechaNacimiento).format('LL'); + '</div>'
+                    rw += '</div>';
+                    rw += '</article></a>';
+                    articles.append(rw);
+                    count += 1;
+                });
+            });
+    });
+
+    function loadContent(url) {
+        let data = $("#data" + url + "").val();
+
+        $.ajax({
+            url: '@Url.Action("SetViewData", "Home")',
+            type: 'POST',
+            data: { value: data },
+            success: function (response) {
+                window.location.href = '@Url.Action("Article", "Home")';
+            }, error: function (xhr, textStatus, error) {
+                alert(error, "Error", "error");
+            }
+        });        
+    }
+</script>
+

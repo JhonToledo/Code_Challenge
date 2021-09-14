@@ -1,0 +1,42 @@
+﻿@model wdHodinkee.Models.article
+@{
+    ViewData["Title"] = "Article";
+}
+
+<style>
+    .parrafo:first-letter {
+        font-size: 400%;
+        font-weight: 700;
+        text-transform:uppercase;
+    }
+</style>
+
+<br />
+<div class="container">
+    <article class="row">
+        <div class="img-responsive">
+            <img src="@Model.image" style="width: -webkit-fill-available;height: 600px;" />
+        </div>
+        <br />
+        <div class="form-group">
+            <span style="font-size:26pt; font-family: Marker Felt;font-weight:700;">@Model.title</span>
+            <p style="font-size: 12pt; color: #808080">@Model.description</p>
+            <br />
+            <div style="padding: 10px 0px 10px 0px; border-top: 1px solid #bfbfc2; border-bottom: 1px solid #bfbfc2;">
+                <div>
+                    <div style="width:40px;display:inline-flex">
+                        <img class="byline-author-img" srcset="https://hodinkee.imgix.net/uploads/images/1552315966038-1576qr445ma-57e7f835b60c567333e782bdc92f2fd6/cole_pennington_hires_v2.png?ixlib=rails-1.1.0&amp;fm=jpg&amp;q=55&amp;auto=format&amp;usm=12&amp;h=36&amp;w=36 1x, https://hodinkee.imgix.net/uploads/images/1552315966038-1576qr445ma-57e7f835b60c567333e782bdc92f2fd6/cole_pennington_hires_v2.png?ixlib=rails-1.1.0&amp;fm=jpg&amp;q=55&amp;auto=format&amp;usm=12&amp;h=36&amp;w=36&amp;dpr=2 2x" src="https://hodinkee.imgix.net/uploads/images/1552315966038-1576qr445ma-57e7f835b60c567333e782bdc92f2fd6/cole_pennington_hires_v2.png?ixlib=rails-1.1.0&amp;fm=jpg&amp;q=55&amp;auto=format&amp;usm=12&amp;h=36&amp;w=36">
+                    </div>
+                    <div style="width: 240px;display:inline-block">
+                        <span style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">@Model.source.name.ToUpper()</span>
+                        <br />
+                        <span style="color: #808080;font-size:8pt">@Convert.ToDateTime(Model.publishedAt).ToString("D").ToUpper()</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <p class="parrafo" style="margin: 25px 50px 0px 50px; font-family:Arial">@Model.content</p>
+        </div>
+    </article>
+</div>

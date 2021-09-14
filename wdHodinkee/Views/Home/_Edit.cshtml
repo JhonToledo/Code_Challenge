@@ -1,0 +1,104 @@
+﻿
+<link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+
+<script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+
+<div class="modal-header">
+    <button type="button" class="modal-close-btn close">
+        <span aria-hidden="true">&times;</span>
+        <span class="sr-only">Close</span>
+    </button>
+    <h4 class="modal-title" id="myModalLabel">
+        <i class="fa fa-list-alt"></i>&nbsp;
+        Edit Article
+    </h4>
+</div>
+
+<form id="frmArticle">
+    <div class="modal-body">
+        <div style="margin: 15px">
+            <div class="form-group">
+                <label class="font-weight-bold">Title</label>
+                <input type="text" id="txtTitle" name="Title" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label class="font-weight-bold">Author</label>
+                <input type="text" id="txtAuthor" name="Author" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label class="font-weight-bold">Description</label>
+                <input type="text" id="txtDescription" name="Description" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label class="font-weight-bold">Content</label>
+                <textarea class="form-control" id="txtContent" name="Content" rows="7" required></textarea>
+            </div>
+            <div class="form-group">
+                <label class="font-weight-bold">Image</label>
+                <input type='file' id="image" name="Image" placeholder="Browse..." />
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" id="btnSave" class="btn btn-success">Save</button>
+    </div>
+
+</form>
+<script>
+
+
+
+    document.querySelector("#image").addEventListener("change", function () {
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+            localStorage.setItem("img", reader.result);
+        });
+        reader.readAsDataURL(this.files[0]);
+    });
+
+    $(document).ready(function () {
+        loadData();
+
+        jQuery.validator.setDefaults({
+            debug: true,
+            success: "valid"
+        });
+
+        $("#frmArticle").validate({
+            rules: {
+                field: {
+                    required: true
+                }
+            }
+        });
+
+        $("#btnSave").click(function () {
+            let date = (new Date()).toISOString().split('T')[0];
+            let list = getList();
+
+            let author = $("#txtAuthor").val();
+            let title = $("#txtTitle").val();
+            let description = $("#txtDescription").val();
+            let content = $("#txtContent").val();
+            let image = localStorage.getItem('img');
+            let publishedAt = date;
+            let source = { name: author, publishedAt: publishedAt };
+            editNews(title, description, content, image, publishedAt, source);
+        });
+
+    });
+
+    function loadData() {
+        let url = localStorage.getItem("edit");
+        let data = getList();
+        let row = data.filter(elemt => elemt.url == url);
+
+        $("#txtTitle").val(row[0].title);
+        $("#txtDescription").val(row[0].description);
+        $("#txtAuthor").val(row[0].source.name);
+        $("#txtContent").val(row[0].content);
+        localStorage.setItem("img", row[0].image);
+
+    }
+</script>
